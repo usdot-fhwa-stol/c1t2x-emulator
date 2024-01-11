@@ -69,7 +69,7 @@ msg = {'number': 22, 'text': uName}
 encoded = myUName.encode('Message', msg)
 
 
-# instantiate networks
+# Instantiate networks
 # LAN
 if netTestType=="LAN":
     try:
@@ -81,6 +81,7 @@ if netTestType=="LAN":
     except:
         if printData:
             print("Not connected to a LAN interface")
+            
 # VANET
 if netTestType=="VANET":
     try:

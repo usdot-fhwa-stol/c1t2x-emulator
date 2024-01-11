@@ -21,16 +21,17 @@ from threading import Thread
 
 from Networking.networking import UDP_NET
 
-# LOGGING
+### Logging
 c1t2x_logger = None
-# Get Logging Level
 LOGGING_LEVEL = logging.INFO
 logs_directory = os.path.join(os.getcwd(), "Logs")
+
 # IF: Check if the Logs directory does not exist
 if not os.path.exists(logs_directory):
 	# Create Logs directory
 	os.mkdir(logs_directory, 0o777)
-# Log filename
+
+# Setup logger with formatting
 log_filename = "c1t2x_OBU.log"
 c1t2x_logger = logging.getLogger(__name__)
 c1t2x_logger.setLevel(LOGGING_LEVEL)
@@ -39,17 +40,16 @@ c1t2x_logger_handler.setLevel(LOGGING_LEVEL)
 c1t2x_logger_formatter = logging.Formatter("[%(asctime)s.%(msecs)03d] %(levelname)s - %(message)s", datefmt= "%d-%b-%y %H:%M:%S")
 c1t2x_logger_handler.setFormatter(c1t2x_logger_formatter)
 c1t2x_logger.addHandler(c1t2x_logger_handler)
-# start logging
+# Start logging
 c1t2x_logger.info("\n---------------------------\nStarting C1T2X OBU Logger\n---------------------------")
 
-
-# initialize errors
+# Initialize error
 error = False
 
-# determine printing
+# Default to printing output
 printData = True
 
-# Import Configs
+### Import Configs
 script_dir = os.path.dirname(__file__)
 fpath = 'config/params.yaml'
 file_path = os.path.join(script_dir, fpath)
@@ -79,7 +79,7 @@ else:
 	c1t2x_logger.warning("Configured LOGGING LEVEL is invalid. Level is set to WARNING.")
 
 
-# instantiate networks
+### Instantiate networks
 # LAN
 try:
 	lan = UDP_NET(CONFIG_FILE='LAN_params.yaml',logger=c1t2x_logger)
@@ -91,6 +91,7 @@ except:
 	c1t2x_logger.warning("Not connected to a LAN interface")
 	if printData:
 		print("Not connected to a LAN interface")
+
 # VANET
 try:
 	vanet = UDP_NET(CONFIG_FILE='VANET_params.yaml',logger=c1t2x_logger)
@@ -115,7 +116,6 @@ def VANET_listening_thread():
 	global error
 
 	while not error and not vanet.error:
-
 		try:
 			pkt = vanet.recv_packets()
 			c1t2x_logger.debug("Received %s from VANET" %pkt)
