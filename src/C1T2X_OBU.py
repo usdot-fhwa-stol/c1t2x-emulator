@@ -17,19 +17,29 @@
 
 import os, logging, time
 from ruamel.yaml import YAML
-from threading import Thread
+from threading import Thread, Lock
+from pathlib import Path, PurePath
+import argparse
 
 from Networking.networking import UDP_NET
 
-### Logging
+# Initialize mutex
+mutex = Lock()
+
+# Initialize argpaser
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--print", help="prints output to the terminal", action="store_true")
+args = parser.parse_args()
+
+# Logging
 c1t2x_logger = None
 LOGGING_LEVEL = logging.INFO
-logs_directory = os.path.join(os.getcwd(), "Logs")
+logs_directory = PurePath.joinpath(Path.cwd(), "Logs")
 
 # IF: Check if the Logs directory does not exist
 if not os.path.exists(logs_directory):
 	# Create Logs directory
-	os.mkdir(logs_directory, 0o777)
+	os.mkdir(logs_directory, 0o775)
 
 # Setup logger with formatting
 log_filename = "c1t2x_OBU.log"
@@ -47,7 +57,10 @@ c1t2x_logger.info("\n---------------------------\nStarting C1T2X OBU Logger\n---
 error = False
 
 # Default to printing output
-printData = True
+if(args.print):
+	printData = True
+else:
+	printData = False
 
 ### Import Configs
 script_dir = os.path.dirname(__file__)
@@ -63,11 +76,11 @@ try:
 	printData = params['print_data']
 	loopTime = params['loop_time']
 	logLevel = params['logging_level']
-except:
+except Exception as e:
 	c1t2x_logger.error("Unable to import master yaml configs")
 	error = True
 	print("Unable to import yaml configs")
-	raise ImportError
+	raise e
 
 if logLevel == 'DEBUG': c1t2x_logger.setLevel(logging.DEBUG)
 elif logLevel == 'INFO': c1t2x_logger.setLevel(logging.INFO)
@@ -79,7 +92,7 @@ else:
 	c1t2x_logger.warning("Configured LOGGING LEVEL is invalid. Level is set to WARNING.")
 
 
-### Instantiate networks
+# Instantiate networks
 # LAN
 try:
 	lan = UDP_NET(CONFIG_FILE='LAN_params.yaml',logger=c1t2x_logger)
@@ -115,25 +128,29 @@ def sendLAN(lPacket):
 def VANET_listening_thread():
 	global error
 
-	while not error and not vanet.error:
-		try:
-			pkt = vanet.recv_packets()
-			c1t2x_logger.debug("Received %s from VANET" %pkt)
-			if pkt:
-				if not parseVANETPacket:
-					sendLAN(pkt[0])
-				else:
-					# feature to parse incoming VANET message is not yet enabled
-					c1t2x_logger.error("Feature to parse incoming VANET message is not yet enabled")
-					raise NotImplementedError
+	while not vanet.error:
+		with mutex:
+			if error:
+				break
+
+			try:
+				pkt = vanet.recv_packets()
+				c1t2x_logger.debug("Received %s from VANET" %pkt)
+				if pkt:
+					if not parseVANETPacket:
+						sendLAN(pkt[0])
+					else:
+						# feature to parse incoming VANET message is not yet enabled
+						c1t2x_logger.error("Feature to parse incoming VANET message is not yet enabled")
+						raise NotImplementedError
+					if printData:
+						print(pkt)
+			except:
 				if printData:
-					print(pkt)
-		except:
-			if printData:
-				print("Waiting to configure LAN")
-			c1t2x_logger.info("Waiting to configure LAN")
-			time.sleep(0.25)
-		time.sleep(loopTime)
+					print("Waiting to configure LAN")
+				c1t2x_logger.info("Waiting to configure LAN")
+				time.sleep(0.25)
+			time.sleep(loopTime)
 
 	error = True
 	c1t2x_logger.info("Terminating VANET Thread")
@@ -141,27 +158,31 @@ def VANET_listening_thread():
 def LAN_listening_thread():
 	global error
 
-	while not error and not lan.error:
-		try:
-			pkt = lan.recv_packets()
-			if pkt:
-				if not parseLANPacket:
-					sendVANET(pkt[0])
-				else:
-					# feature to parse incoming LAN packet is not enabled
-					# this feature may be used for things like responding to requests from the LAN connection, etc.
-					# there is no intent for this feature to be enabled but it is being allocated space in the code
-					c1t2x_logger.error("Feature to parse incoming LAN is not enabled")
-					raise NotImplementedError
-		except:
-			if printData:
-				print("Waiting to configure VANET")
-			c1t2x_logger.debug("Waiting to configure VANET")
-			time.sleep(0.25)
-		time.sleep(loopTime)
+	while not lan.error:
+		with mutex:
+			if error:
+				c1t2x_logger.info("Terminating LAN Thread")
+				break
+
+			try:
+				pkt = lan.recv_packets()
+				if pkt:
+					if not parseLANPacket:
+						sendVANET(pkt[0])
+					else:
+						# feature to parse incoming LAN packet is not enabled
+						# this feature may be used for things like responding to requests from the LAN connection, etc.
+						# there is no intent for this feature to be enabled but it is being allocated space in the code
+						c1t2x_logger.error("Feature to parse incoming LAN is not enabled")
+						raise NotImplementedError
+			except:
+				if printData:
+					print("Waiting to configure VANET")
+				c1t2x_logger.debug("Waiting to configure VANET")
+				time.sleep(0.25)
+			time.sleep(loopTime)
 
 	error = True
-
 	c1t2x_logger.info("Terminating LAN Thread")
 
 def main():

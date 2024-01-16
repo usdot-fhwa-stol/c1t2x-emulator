@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Written by the USDOT Volpe National Transportation Systems Center
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -31,7 +29,7 @@ class UDP_NET:
 
 		self.netType = CONFIG_FILE.split('_')[0]
 
-		### Logging
+		# Logging
 		# If no logger creates log directory
 		if logger:
 			self.logger = logger
@@ -58,7 +56,7 @@ class UDP_NET:
 			logger_handler.setFormatter(logger_formatter)
 			self.logger.addHandler(logger_handler)
 
-		### Import Configs
+		# Import Configs
 		script_dir = os.path.dirname(__file__)
 		fpath = 'config/' + CONFIG_FILE
 		file_path = os.path.join(script_dir, fpath)
@@ -70,11 +68,11 @@ class UDP_NET:
 			self.PORT = params['PORT']
 			self.bufferSize = params['BUFFER_SIZE']
 			INTERFACE = params['INTERFACE']
-		except:
+		except Exception as e:
 			if logger:
 				self.logger.error("%s: Unable to import yaml configs" %self.netType)
 				self.error = True
-				raise ImportError
+				raise e
 			if self.print_data:
 				print("Unable to import yaml configs")
 
