@@ -135,8 +135,8 @@ def listening_thread():
             elif netTestType =="LAN":
                 pkt = lan.recv_packets()
             if pkt:
-                print("recvd_pkt: {}\nog_encoded: {}".format(pkt[0],encoded))
-                print("loop_test_result: {}".format(pkt[0]==encoded))
+                print(f"recvd_pkt: {pkt[0]}\nog_encoded: {encoded}")
+                print(f"loop_test_result: {pkt[0]==encoded}")
         except:
             if printData:
                 print("Waiting to configure network")
