@@ -31,6 +31,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--print", help="prints output to the terminal", action="store_true")
 args = parser.parse_args()
 
+
 # Logging
 c1t2x_logger = None
 LOGGING_LEVEL = logging.INFO
@@ -56,13 +57,10 @@ c1t2x_logger.info("\n---------------------------\nStarting C1T2X OBU Logger\n---
 # Initialize error
 error = False
 
-# Default to printing output
-if(args.print):
-	printData = True
-else:
-	printData = False
+# Sets printData bool to cmd line arg
+printData = args.print
 
-### Import Configs
+# Import Configs
 script_dir = os.path.dirname(__file__)
 fpath = 'config/params.yaml'
 file_path = os.path.join(script_dir, fpath)
