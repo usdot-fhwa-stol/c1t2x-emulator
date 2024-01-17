@@ -26,4 +26,4 @@ BUFFER_SIZE: 4096
 
 # String: Interface for which to pull own IP
 # Units: Interface
-INTERFACE: 'wlan0'
+INTERFACE: 'eth0'

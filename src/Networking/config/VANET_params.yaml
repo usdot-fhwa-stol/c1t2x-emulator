@@ -19,7 +19,7 @@ NET_TYPE: 'VANET'
 IP: '192.168.12.255'
 
 # Integer: Networking Port for the VANET
-PORT: 1667
+PORT: 7235
 
 # Integer: Buffer size for receiving
 # Units: Bytes
