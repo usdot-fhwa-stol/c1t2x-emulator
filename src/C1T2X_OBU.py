@@ -135,7 +135,7 @@ def VANET_listening_thread():
 
 			try:
 				pkt = vanet.recv_packets()
-				c1t2x_logger.debug("Received %s from VANET" %pkt)
+				c1t2x_logger.debug("Received {} from VANET".format(pkt))
 				if pkt:
 					if not parseVANETPacket:
 						sendLAN(pkt[0])
@@ -199,7 +199,7 @@ def main():
 	threads.append(VANET_mt)
 
 	for thread in threads:
-		c1t2x_logger.debug("Starting %s" %thread.name)
+		c1t2x_logger.debug("Starting {}".format(thread.name))
 		thread.daemon=True
 		thread.start()
 		time.sleep(0.2)
