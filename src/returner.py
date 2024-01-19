@@ -24,7 +24,7 @@ from Networking.networking import UDP_NET
 # initialize errors
 error = False
 
-# determine printing
+# test scripts should always print
 printData = True
 
 # Import Configs
@@ -41,10 +41,10 @@ try:
     printData = params['print_data']
     loopTime = params['loop_time']
     logLevel = params['logging_level']
-except:
+except Exception as e:
     error = True
     print("Unable to import yaml configs")
-    raise ImportError
+    raise e
 
 netTestType = sys.argv[1]
 if sys.argv[1] == "vanet":
@@ -69,7 +69,7 @@ msg = {'number': 22, 'text': uName}
 encoded = myUName.encode('Message', msg)
 
 
-# instantiate networks
+# Instantiate networks
 # LAN
 if netTestType=="LAN":
     try:
@@ -81,6 +81,7 @@ if netTestType=="LAN":
     except:
         if printData:
             print("Not connected to a LAN interface")
+            
 # VANET
 if netTestType=="VANET":
     try:

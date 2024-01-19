@@ -45,7 +45,7 @@ If the wireless and wired network interfaces are unknown, the following command 
 basename -a /sys/class/net/*
 ```
 
-The IP and Port that are used should 
+The VANET IP and Port that are used should be consistent across all radios on the VANET.
 
 ## Testing
 You can test a full loop of the VANET with the scripts broadcaster.py and returner.py
