@@ -12,13 +12,17 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# String: Networking IP for the LAN
-# Units: IP Address
-IP: '127.0.0.1'
+# String: Networking IP to send to on LAN
+sendIP: '192.168.217.10'
 
-# Integer: Networking Port for the LAN
-# Units: Port
-PORT: 22
+# Integer: Networking Port to send to on LAN
+sendPORT: 5398
+
+# String: Networking IP to receive from on LAN
+recvIP: '192.168.217.40'
+
+# Integer: Networking port to receive from on LAN
+recvPORT: 1516
 
 # Integer: Buffer size for receiving
 # Units: Bytes

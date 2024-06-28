@@ -42,7 +42,7 @@ class UDP_NET:
 				os.mkdir(logs_directory, 0o777)
 
 			# Log filename
-			log_filename = f"Network_{self.netType}.log"
+			log_filename = "Network_{}.log".format(self.netType)
 
 			# Initialize logger
 			self.logger = logging.getLogger(__name__)
@@ -64,77 +64,79 @@ class UDP_NET:
 			y=YAML(typ='safe')
 			with open(file_path,'r') as f:
 				params = y.load(f)
-			self.IP = params['IP']
-			self.PORT = params['PORT']
+			self.sendIP = params['sendIP']
+			self.sendPORT = params['sendPORT']
+			self.recvIP = params['recvIP']
+			self.recvPORT = params['recvPORT']
 			self.bufferSize = params['BUFFER_SIZE']
 			INTERFACE = params['INTERFACE']
 		except Exception as e:
 			if logger:
-				self.logger.error("%s: Unable to import yaml configs", self.netType)
+				self.logger.error("{}: Unable to import yaml configs".format(self.netType))
 				self.error = True
 				raise e
 			if self.print_data:
 				print("Unable to import yaml configs")
 
 		try:
-			self.ownIP = ni.ifaddresses(INTERFACE)[ni.AF_INET][0]['addr']
+			self.selfIP = ni.ifaddresses(INTERFACE)[ni.AF_INET][0]['addr']
 		except:
-			self.logger.warning("Not connected to the %s interface", self.netType)
+			self.logger.warning("Not connected to the {} interface".format(self.netType))
 			if print_data:
-				print(f"Not connected to the {self.netType} interface")
-			self.ownIP = None
+				print("Not connected to the {} interface".format(self.netType))
+				raise e
 
 		# Initialize socket to None
 		self.sock=None
 
 		# Log initial data
-		self.logger.info("%s: IP | PORT : %s | %s", self.netType, self.IP, self.PORT)
-		self.logger.info("%s: HARDWARE INTERFACE: %s", self.netType, INTERFACE)
-		self.logger.info("%s: Device_IP: {%s", self.netType, self.ownIP)
+		self.logger.info("{}: HARDWARE INTERFACE: {}".format(self.netType, INTERFACE))
+		self.logger.info("{}: SEND IP | PORT: {} | {}".format(self.netType,self.sendIP,self.sendPORT))
+		self.logger.info("{}: RECV IP | PORT: {} | {}".format(self.netType,self.recvIP, self.recvPORT))
 
 	def start_connection(self):
 		# Attempts to create a bound socket to the target IP:PORT
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-			self.sock.bind((self.IP, self.PORT))
-			self.logger.info("%s: Socket bound at: %s | %s", self.netType, self.IP, self.PORT)
+			self.sock.bind((self.recvIP, self.recvPORT))
+			self.logger.info("{}: Socket bound at: {} | {}".format(self.netType,self.recvIP,self.recvPORT))
 		except Exception as excep:
-			self.logger.critical("%s: Unable to bind socket", self.netType)
+			self.logger.critical("{}: Unable to bind socket".format(self.netType))
 			self.error=True
 
 			if self.print_data:
 				print(type(excep))
 				print(excep.args)
-				print(f"{self.netType}: Unable to bind socket")
+				print("{}: Unable to bind socket".format(self.netType))
 			raise NotImplementedError
 
 	def send_data(self, packet, encoded_status = True):
 		# Attempts to encode and send a packet to the target IP:PORT
 		try: 
 			if not encoded_status:
-				self.logger.debug("%s: Packet encoded as type 'ascii'", self.netType)
+				self.logger.debug("{}: Packet encoded as type 'ascii'".format(self.netType))
 				packet = str(packet).encode('ascii')
-			self.sock.sendto(packet,(self.IP,self.PORT))
-			self.logger.info("%s: Packet '%s' sent to %s", self.netType, packet, self.IP)
+			self.sock.sendto(packet,(self.sendIP,self.sendPORT))
+			self.logger.info("{}: Packet '{}' sent to {}".format(self.netType,packet,self.sendIP))
 		except:
-			self.logger.warning("Attempted to send message to the %s - it may not yet be connected", self.netType)
+			self.logger.warning("Attempted to send message to the {} - it may not yet be connected".format(self.netType))
 			if self.print_data:
-				print(f"{self.netType} may not yet be connected")
+				print("{} may not yet be connected".format(self.netType))
 
 	def recv_packets(self):
 		# Attempts to retrieve packets from the current packet buffer
 		try:
 			packet = self.sock.recvfrom(self.bufferSize)
 			# checks if received packet is from self
-			if packet[1][0] != self.ownIP:
-				self.logger.info("%s: Received '%s' from %s", self.netType, packet[0], packet[1][0])
+			if packet[1][0] != self.selfIP:
+				self.logger.info("{}: Received '{}' from {}".format(self.netType, packet[0], packet[1][0]))
 				return packet
 			else:
-				self.logger.debug("%s: Received packet from self @ IP: %s", self.netType, packet[1][0])
+				self.logger.debug("{}: Received packet from self @ IP: {}".format(self.netType,packet[1][0]))
 				return None
 		except:
-			self.logger.warning("Attempted to receive message from the %s - it may not yet be connected", self.netType)
+			self.logger.warning("Attempted to receive message from the {} - it may not yet be connected".format(self.netType))
 			if self.print_data:
 				print("Network may not yet be connected")
 			return None

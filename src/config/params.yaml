@@ -17,10 +17,10 @@
 loop_time: 1e-07
 
 # Boolean: Print Data to console while running
-print_data: False
+print_data: True
 
 # String:
-logging_level: 'INFO'
+logging_level: 'DEBUG'
 
 # Boolean: Decode incoming LAN packet
 LAN_DECODE: False

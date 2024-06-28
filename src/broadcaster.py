@@ -126,7 +126,7 @@ def listening_thread():
     global uName
     global encoded
 
-    while not error and not vanet.error:
+    while not error:
 
         try:
             if netTestType =="VANET":
