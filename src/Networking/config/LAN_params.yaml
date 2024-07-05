@@ -13,13 +13,13 @@
 # the License.
 
 # String: Networking IP to send to on LAN
-sendIP: '192.168.217.10'
+sendIP: '192.168.88.10'
 
 # Integer: Networking Port to send to on LAN
 sendPORT: 5398
 
 # String: Networking IP to receive from on LAN
-recvIP: '192.168.217.40'
+recvIP: '192.168.88.40'
 
 # Integer: Networking port to receive from on LAN
 recvPORT: 1516
