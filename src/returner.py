@@ -113,7 +113,7 @@ def VANET_listening_thread():
             pkt = vanet.recv_packets()
 
             if pkt:
-                #print(myUName.decode('Message',pkt[0]))
+                print(myUName.decode('Message',pkt[0]))
                 sendVANET(pkt[0])
         except:
             if printData:
