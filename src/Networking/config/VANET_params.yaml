@@ -15,11 +15,17 @@
 # String: Network Type
 NET_TYPE: 'VANET'
 
-# String: Networking IP for the VANET
-IP: '192.168.12.255'
+# String: Networking IP to send to for the VANET
+sendIP: '192.168.0.255'
 
-# Integer: Networking Port for the VANET
-PORT: 7235
+# Integer: Networking Port to send to for the VANET
+sendPORT: 1517
+
+# String: Networking IP to receive from on the VANET
+recvIP: '192.168.0.255'
+
+# Integer: Networking port to receive from on the VANET
+recvPORT: 1517
 
 # Integer: Buffer size for receiving
 # Units: Bytes
