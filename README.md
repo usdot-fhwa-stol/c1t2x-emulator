@@ -45,7 +45,7 @@ If the wireless and wired network interfaces are unknown, the following command 
 basename -a /sys/class/net/*
 ```
 
-The IP and Port that are used should 
+The VANET IP and Port that are used should be consistent across all radios on the VANET.
 
 ## Testing
 You can test a full loop of the VANET with the scripts broadcaster.py and returner.py
@@ -67,4 +67,11 @@ The returner will receive the message, and send the message back over the vanet.
 The broadcaster will receive the message, and it will compare the received copy against the originally broadcasted copy.
 
 ## Running
-Once all config files are correctly made, run the `C1T2X_OBU.py` script to start the on board unit (OBU) emulator.
+Once all config files are correctly made, run the `C1T2X_OBU.py` script to start the on board unit (OBU) emulator. This can be run on boot automatically with a crontab job
+
+```
+ln -s /home/$USER/c1t_ws/src/c1t2x-emulator/src/C1T2X_OBU.py /bin/C1T2X_OBU.py
+crontab -e
+# Add this line to the end
+@reboot python /bin/C1T2X_OBU.py &
+```

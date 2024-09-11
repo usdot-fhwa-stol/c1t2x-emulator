@@ -24,7 +24,7 @@ from Networking.networking import UDP_NET
 # initialize errors
 error = False
 
-# determine printing
+# test scripts should always print
 printData = True
 
 # Import Configs
@@ -41,10 +41,10 @@ try:
     printData = params['print_data']
     loopTime = params['loop_time']
     logLevel = params['logging_level']
-except:
+except Exception as e:
     error = True
     print("Unable to import yaml configs")
-    raise ImportError
+    raise e
 
 netTestType = sys.argv[1]
 if sys.argv[1] == "vanet":
@@ -126,7 +126,7 @@ def listening_thread():
     global uName
     global encoded
 
-    while not error and not vanet.error:
+    while not error:
 
         try:
             if netTestType =="VANET":
@@ -135,8 +135,8 @@ def listening_thread():
             elif netTestType =="LAN":
                 pkt = lan.recv_packets()
             if pkt:
-                print('recvd_pkt: %s\nog_encoded: %s' %(pkt[0],encoded))
-                print('loop_test_result: %s' %(pkt[0]==encoded))
+                print(f"recvd_pkt: {pkt[0]}\nog_encoded: {encoded}")
+                print(f"loop_test_result: {pkt[0]==encoded}")
         except:
             if printData:
                 print("Waiting to configure network")
