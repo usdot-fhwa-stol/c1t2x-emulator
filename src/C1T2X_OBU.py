@@ -58,6 +58,9 @@ c1t2x_logger.info("\n---------------------------\nStarting C1T2X OBU Logger\n---
 # Initialize error
 error = False
 
+# Initialize waiting for ack
+waiting_for_ack = False
+
 # Sets printData bool to cmd line arg
 printData = args.print
 
@@ -125,8 +128,8 @@ def sendLAN(lPacket):
 	lan.send_data(strip_header(lPacket))
 
 def VANET_listening_thread():
-	global error
-
+	global error, waiting_for_ack
+	previous_packet_received = ""
 	while not vanet.error:
 		with mutex:
 			if error:
@@ -137,7 +140,22 @@ def VANET_listening_thread():
 			c1t2x_logger.debug("Received %s from VANET", pkt)
 			if pkt:
 				if not parseVANETPacket:
-					sendLAN(pkt[0])
+					# Check if ack or payload
+					data = pkt[0].decode('utf-8')
+					if data == "1":  # Ack
+						with mutex:
+							wait_for_ack = False
+						c1t2x_logger.info("Received ack")
+					elif data == previous_packet_received:  # Duplicate message received, so just resend ack
+						ack = b"1"
+						sendVANET(ack)
+						c1t2x_logger.info("Received duplicate message, resending ack")
+					else:  # New message received, forward it to LAN and send ack
+						ack = b"1"
+						sendVANET(ack)
+						sendLAN(pkt[0])
+						previous_packet_received = pkt[0]
+						c1t2x_logger.info("Received new message, sent ack")
 				else:
 					# feature to parse incoming VANET message is not yet enabled
 					c1t2x_logger.error("Feature to parse incoming VANET message is not yet enabled")
@@ -156,7 +174,7 @@ def VANET_listening_thread():
 		c1t2x_logger.info("Terminating VANET Thread")
 
 def LAN_listening_thread():
-	global error
+	global error, waiting_for_ack
 
 	while not lan.error:
 		with mutex:
@@ -169,6 +187,18 @@ def LAN_listening_thread():
 			if pkt:
 				if not parseLANPacket:
 					sendVANET(pkt[0])
+					# Wait for ack
+					waiting_for_ack = True
+					c1t2x_logger.info("Message sent, waiting for ack")
+					time.sleep(1.0)
+					while True:
+						with mutex:
+							if waiting_for_ack:
+								sendVANET(pkt[0])
+								c1t2x_logger.info("Still waiting for ack")
+							else:
+								break
+						time.sleep(1.0)
 				else:
 					# feature to parse incoming LAN packet is not enabled
 					# this feature may be used for things like responding to requests from the LAN connection, etc.
