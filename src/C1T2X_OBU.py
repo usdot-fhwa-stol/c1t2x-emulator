@@ -20,6 +20,7 @@ from ruamel.yaml import YAML
 from threading import Thread, Lock
 from pathlib import Path, PurePath
 import argparse
+from binascii import unhexlify
 
 from Networking.networking import UDP_NET
 
@@ -121,7 +122,7 @@ def sendVANET(vPacket):
 
 def sendLAN(lPacket):
 	global lan
-	lan.send_data(lPacket)
+	lan.send_data(strip_header(lPacket))
 
 def VANET_listening_thread():
 	global error
@@ -184,6 +185,13 @@ def LAN_listening_thread():
 	with mutex:
 		error = True
 		c1t2x_logger.info("Terminating LAN Thread")
+
+def strip_header(packet):
+    data = packet.decode('ascii')
+    idx = data.find("Payload=")
+    payload = data[idx+8:-1]
+    encoded = payload.encode('utf-8')
+    return unhexlify(encoded)
 
 def main():
 
