@@ -20,7 +20,7 @@ loop_time: 1e-07
 print_data: False
 
 # String:
-logging_level: 'WARN'
+logging_level: 'DEBUG'
 
 # Boolean: Decode incoming LAN packet
 LAN_DECODE: False
