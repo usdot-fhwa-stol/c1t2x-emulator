@@ -186,6 +186,8 @@ def LAN_listening_thread():
 		error = True
 		c1t2x_logger.info("Terminating LAN Thread")
 
+# Removes unnecessary RSU header information
+# Source: https://github.com/usdot-fhwa-stol/carma-platform/blob/develop/engineering_tools/msgIntersect.py
 def strip_header(packet):
     data = packet.decode('ascii')
     idx = data.find("Payload=")
