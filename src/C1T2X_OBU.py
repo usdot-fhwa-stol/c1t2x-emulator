@@ -130,6 +130,7 @@ def sendLAN(lPacket):
 def VANET_listening_thread():
 	global error, waiting_for_ack
 	previous_packet_received = ""
+	ack = b"1"
 	while not vanet.error:
 		with mutex:
 			if error:
@@ -147,11 +148,9 @@ def VANET_listening_thread():
 							wait_for_ack = False
 						c1t2x_logger.info("Received ack")
 					elif data == previous_packet_received:  # Duplicate message received, so just resend ack
-						ack = b"1"
 						sendVANET(ack)
 						c1t2x_logger.info("Received duplicate message, resending ack")
 					else:  # New message received, forward it to LAN and send ack
-						ack = b"1"
 						sendVANET(ack)
 						sendLAN(pkt[0])
 						previous_packet_received = pkt[0]
@@ -191,7 +190,7 @@ def LAN_listening_thread():
 					waiting_for_ack = True
 					c1t2x_logger.info("Message sent, waiting for ack")
 					time.sleep(1.0)
-					while True:
+					for i in range(120):  # Attempt to rebroadcast for 2 minutes before giving up
 						with mutex:
 							if waiting_for_ack:
 								sendVANET(pkt[0])
@@ -199,6 +198,8 @@ def LAN_listening_thread():
 							else:
 								break
 						time.sleep(1.0)
+                    if waiting_for_ack:
+                        print("Ack was never received")
 				else:
 					# feature to parse incoming LAN packet is not enabled
 					# this feature may be used for things like responding to requests from the LAN connection, etc.
