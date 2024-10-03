@@ -198,8 +198,8 @@ def LAN_listening_thread():
 							else:
 								break
 						time.sleep(1.0)
-                    if waiting_for_ack:
-                        raise Exception("Ack was never received")
+                    			if waiting_for_ack:
+                        			raise Exception("Ack was never received")
 				else:
 					# feature to parse incoming LAN packet is not enabled
 					# this feature may be used for things like responding to requests from the LAN connection, etc.
