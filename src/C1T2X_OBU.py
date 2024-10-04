@@ -145,7 +145,7 @@ def VANET_listening_thread():
 					data = pkt[0].decode('utf-8')
 					if data == "1":  # Ack
 						with mutex:
-							wait_for_ack = False
+							waiting_for_ack = False
 						c1t2x_logger.info("Received ack")
 					elif data == previous_packet_received:  # Duplicate message received, so just resend ack
 						sendVANET(ack)
